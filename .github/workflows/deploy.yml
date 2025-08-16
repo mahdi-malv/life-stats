@@ -29,7 +29,7 @@ jobs:
         run: |
           touch .nojekyll
           if [ ! -f index.html ] && [ -f life-stat.html ]; then
-            cp life-stat.html index.html`
+            cp life-stat.html index.html
           fi
 
       - name: Upload artifact
