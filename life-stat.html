@@ -32,6 +32,22 @@
       --track: rgba(255, 255, 255, 0.12);
       --radius: 14px;
       --shadow-neon: 0 0 0 1px rgba(0, 255, 200, 0.25), 0 0 18px rgba(0, 255, 200, 0.18), inset 0 0 24px rgba(0, 255, 200, 0.08);
+      
+      /* Stat-specific colors */
+      --physical-color: #ff6b6b;        /* Red */
+      --relationship-color: #4ecdc4;    /* Teal */
+      --discipline-color: #45b7d1;      /* Blue */
+      --mental-color: #96ceb4;          /* Green */
+      --intellect-color: #feca57;       /* Orange/Yellow */
+      --ambition-color: #a29bfe;        /* Purple */
+      
+      /* Glowing variants */
+      --physical-glow: rgba(255, 107, 107, 0.3);
+      --relationship-glow: rgba(78, 205, 196, 0.3);
+      --discipline-glow: rgba(69, 183, 209, 0.3);
+      --mental-glow: rgba(150, 206, 180, 0.3);
+      --intellect-glow: rgba(254, 202, 87, 0.3);
+      --ambition-glow: rgba(162, 155, 254, 0.3);
     }
 
     * {
@@ -47,8 +63,12 @@
       color: var(--text-100);
       font-family: 'Orbitron', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
       background:
-        radial-gradient(1200px 600px at 80% -10%, rgba(123, 97, 255, 0.2), transparent 60%),
+        radial-gradient(1200px 600px at 80% -10%, rgba(162, 155, 254, 0.15), transparent 60%),
         radial-gradient(900px 500px at -10% 110%, rgba(0, 255, 200, 0.12), transparent 60%),
+        radial-gradient(800px 400px at 120% 50%, rgba(255, 107, 107, 0.08), transparent 60%),
+        radial-gradient(600px 300px at -20% 30%, rgba(254, 202, 87, 0.06), transparent 60%),
+        radial-gradient(1000px 500px at 50% 120%, rgba(69, 183, 209, 0.08), transparent 60%),
+        radial-gradient(700px 350px at 30% -20%, rgba(150, 206, 180, 0.06), transparent 60%),
         linear-gradient(180deg, #0a0f15 0%, #0b1118 100%),
         /* Subtle grid */
         repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 22px),
@@ -248,9 +268,36 @@
       border-radius: var(--radius);
       padding: 14px;
       border: 1px solid rgba(255,255,255,0.08);
-      background: linear-gradient(180deg, rgba(10,15,22,0.9), rgba(10,15,22,0.75));
-      box-shadow: var(--shadow-neon), inset 0 0 80px rgba(123, 97, 255, 0.06);
+      background: 
+        radial-gradient(circle at 30% 80%, rgba(255, 107, 107, 0.12), transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(78, 205, 196, 0.1), transparent 50%),
+        radial-gradient(circle at 40% 40%, rgba(69, 183, 209, 0.08), transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(150, 206, 180, 0.1), transparent 50%),
+        radial-gradient(circle at 20% 20%, rgba(254, 202, 87, 0.08), transparent 50%),
+        radial-gradient(circle at 60% 10%, rgba(162, 155, 254, 0.1), transparent 50%),
+        linear-gradient(180deg, rgba(10,15,22,0.9), rgba(10,15,22,0.75));
+      box-shadow: 
+        var(--shadow-neon), 
+        inset 0 0 80px rgba(123, 97, 255, 0.06),
+        0 0 100px rgba(0, 255, 200, 0.08);
       min-height: 360px;
+      overflow: hidden;
+    }
+    
+    .chart-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: 
+        radial-gradient(ellipse 400px 200px at 20% 90%, var(--physical-glow), transparent 70%),
+        radial-gradient(ellipse 300px 150px at 80% 10%, var(--relationship-glow), transparent 70%),
+        radial-gradient(ellipse 250px 120px at 90% 70%, var(--discipline-glow), transparent 70%),
+        radial-gradient(ellipse 350px 180px at 10% 30%, var(--mental-glow), transparent 70%),
+        radial-gradient(ellipse 200px 100px at 60% 95%, var(--intellect-glow), transparent 70%),
+        radial-gradient(ellipse 280px 140px at 40% 5%, var(--ambition-glow), transparent 70%);
+      opacity: 0.4;
+      pointer-events: none;
+      z-index: -1;
     }
 
     @media (min-width: 768px) {
@@ -281,10 +328,16 @@
       font-weight: 800;
       font-size: 48px;
       letter-spacing: 0.06em;
-      color: #dffff6;
+      color: #ffffff;
       text-shadow:
-        0 0 24px rgba(0,255,200,0.45),
-        0 0 48px rgba(0,255,200,0.25);
+        0 0 20px rgba(255, 107, 107, 0.3),
+        0 0 30px rgba(78, 205, 196, 0.3),
+        0 0 40px rgba(69, 183, 209, 0.3),
+        0 0 20px rgba(150, 206, 180, 0.3),
+        0 0 30px rgba(254, 202, 87, 0.3),
+        0 0 40px rgba(162, 155, 254, 0.3),
+        0 0 60px rgba(0,255,200,0.4);
+      filter: drop-shadow(0 0 8px rgba(255,255,255,0.8));
     }
 
     .avg-label {
@@ -312,6 +365,121 @@
       box-shadow: 0 0 12px rgba(0,255,200,0.7);
       border: 1px solid rgba(0,0,0,0.6);
     }
+
+    /* Stat-specific control styling */
+    .control[data-stat="physical"] {
+      border-color: var(--physical-color);
+      background: radial-gradient(circle at top right, var(--physical-glow), rgba(10, 14, 22, 0.5));
+    }
+    .control[data-stat="physical"] .value-badge {
+      border-color: var(--physical-color);
+      background: linear-gradient(180deg, var(--physical-glow), rgba(255, 107, 107, 0.1));
+      color: var(--physical-color);
+      box-shadow: 0 0 14px var(--physical-glow) inset, 0 0 20px var(--physical-glow);
+    }
+    .control[data-stat="physical"] input[type="range"] {
+      background: linear-gradient(90deg, var(--physical-color) 50%, var(--track) 0);
+    }
+    .control[data-stat="physical"] input[type="range"]::-webkit-slider-thumb {
+      background: radial-gradient(circle at 50% 50%, #2d0f0f 0%, #2d0f0f 42%, #5a1f1f 43%, #5a1f1f 55%, var(--physical-color) 56%, var(--physical-color) 100%);
+      border-color: var(--physical-color);
+      box-shadow: 0 0 0 2px var(--physical-glow), 0 0 18px var(--physical-glow), inset 0 0 10px var(--physical-glow);
+    }
+
+    .control[data-stat="relationship"] {
+      border-color: var(--relationship-color);
+      background: radial-gradient(circle at top right, var(--relationship-glow), rgba(10, 14, 22, 0.5));
+    }
+    .control[data-stat="relationship"] .value-badge {
+      border-color: var(--relationship-color);
+      background: linear-gradient(180deg, var(--relationship-glow), rgba(78, 205, 196, 0.1));
+      color: var(--relationship-color);
+      box-shadow: 0 0 14px var(--relationship-glow) inset, 0 0 20px var(--relationship-glow);
+    }
+    .control[data-stat="relationship"] input[type="range"] {
+      background: linear-gradient(90deg, var(--relationship-color) 50%, var(--track) 0);
+    }
+    .control[data-stat="relationship"] input[type="range"]::-webkit-slider-thumb {
+      background: radial-gradient(circle at 50% 50%, #0f2d2a 0%, #0f2d2a 42%, #1f5a55 43%, #1f5a55 55%, var(--relationship-color) 56%, var(--relationship-color) 100%);
+      border-color: var(--relationship-color);
+      box-shadow: 0 0 0 2px var(--relationship-glow), 0 0 18px var(--relationship-glow), inset 0 0 10px var(--relationship-glow);
+    }
+
+    .control[data-stat="discipline"] {
+      border-color: var(--discipline-color);
+      background: radial-gradient(circle at top right, var(--discipline-glow), rgba(10, 14, 22, 0.5));
+    }
+    .control[data-stat="discipline"] .value-badge {
+      border-color: var(--discipline-color);
+      background: linear-gradient(180deg, var(--discipline-glow), rgba(69, 183, 209, 0.1));
+      color: var(--discipline-color);
+      box-shadow: 0 0 14px var(--discipline-glow) inset, 0 0 20px var(--discipline-glow);
+    }
+    .control[data-stat="discipline"] input[type="range"] {
+      background: linear-gradient(90deg, var(--discipline-color) 50%, var(--track) 0);
+    }
+    .control[data-stat="discipline"] input[type="range"]::-webkit-slider-thumb {
+      background: radial-gradient(circle at 50% 50%, #0f1f2d 0%, #0f1f2d 42%, #1f3f5a 43%, #1f3f5a 55%, var(--discipline-color) 56%, var(--discipline-color) 100%);
+      border-color: var(--discipline-color);
+      box-shadow: 0 0 0 2px var(--discipline-glow), 0 0 18px var(--discipline-glow), inset 0 0 10px var(--discipline-glow);
+    }
+
+    .control[data-stat="mental"] {
+      border-color: var(--mental-color);
+      background: radial-gradient(circle at top right, var(--mental-glow), rgba(10, 14, 22, 0.5));
+    }
+    .control[data-stat="mental"] .value-badge {
+      border-color: var(--mental-color);
+      background: linear-gradient(180deg, var(--mental-glow), rgba(150, 206, 180, 0.1));
+      color: var(--mental-color);
+      box-shadow: 0 0 14px var(--mental-glow) inset, 0 0 20px var(--mental-glow);
+    }
+    .control[data-stat="mental"] input[type="range"] {
+      background: linear-gradient(90deg, var(--mental-color) 50%, var(--track) 0);
+    }
+    .control[data-stat="mental"] input[type="range"]::-webkit-slider-thumb {
+      background: radial-gradient(circle at 50% 50%, #1a2d26 0%, #1a2d26 42%, #345a4c 43%, #345a4c 55%, var(--mental-color) 56%, var(--mental-color) 100%);
+      border-color: var(--mental-color);
+      box-shadow: 0 0 0 2px var(--mental-glow), 0 0 18px var(--mental-glow), inset 0 0 10px var(--mental-glow);
+    }
+
+    .control[data-stat="intellect"] {
+      border-color: var(--intellect-color);
+      background: radial-gradient(circle at top right, var(--intellect-glow), rgba(10, 14, 22, 0.5));
+    }
+    .control[data-stat="intellect"] .value-badge {
+      border-color: var(--intellect-color);
+      background: linear-gradient(180deg, var(--intellect-glow), rgba(254, 202, 87, 0.1));
+      color: var(--intellect-color);
+      box-shadow: 0 0 14px var(--intellect-glow) inset, 0 0 20px var(--intellect-glow);
+    }
+    .control[data-stat="intellect"] input[type="range"] {
+      background: linear-gradient(90deg, var(--intellect-color) 50%, var(--track) 0);
+    }
+    .control[data-stat="intellect"] input[type="range"]::-webkit-slider-thumb {
+      background: radial-gradient(circle at 50% 50%, #2d2310 0%, #2d2310 42%, #5a4620 43%, #5a4620 55%, var(--intellect-color) 56%, var(--intellect-color) 100%);
+      border-color: var(--intellect-color);
+      box-shadow: 0 0 0 2px var(--intellect-glow), 0 0 18px var(--intellect-glow), inset 0 0 10px var(--intellect-glow);
+    }
+
+    .control[data-stat="ambition"] {
+      border-color: var(--ambition-color);
+      background: radial-gradient(circle at top right, var(--ambition-glow), rgba(10, 14, 22, 0.5));
+    }
+    .control[data-stat="ambition"] .value-badge {
+      border-color: var(--ambition-color);
+      background: linear-gradient(180deg, var(--ambition-glow), rgba(162, 155, 254, 0.1));
+      color: var(--ambition-color);
+      box-shadow: 0 0 14px var(--ambition-glow) inset, 0 0 20px var(--ambition-glow);
+    }
+    .control[data-stat="ambition"] input[type="range"] {
+      background: linear-gradient(90deg, var(--ambition-color) 50%, var(--track) 0);
+    }
+    .control[data-stat="ambition"] input[type="range"]::-webkit-slider-thumb {
+      background: radial-gradient(circle at 50% 50%, #1f1a2d 0%, #1f1a2d 42%, #3f345a 43%, #3f345a 55%, var(--ambition-color) 56%, var(--ambition-color) 100%);
+      border-color: var(--ambition-color);
+      box-shadow: 0 0 0 2px var(--ambition-glow), 0 0 18px var(--ambition-glow), inset 0 0 10px var(--ambition-glow);
+    }
   </style>
 </head>
 <body>
@@ -326,7 +494,7 @@
       <section class="panel controls" aria-label="Life stat controls">
         <h2>Adjust Your Stats</h2>
 
-        <div class="control">
+        <div class="control" data-stat="physical">
           <div class="row">
             <label for="stat-physical">Physical</label>
             <span class="value-badge" id="value-physical" aria-live="polite">50</span>
@@ -336,7 +504,7 @@
           </div>
         </div>
 
-        <div class="control">
+        <div class="control" data-stat="relationship">
           <div class="row">
             <label for="stat-relationship">Relationship</label>
             <span class="value-badge" id="value-relationship" aria-live="polite">50</span>
@@ -346,7 +514,7 @@
           </div>
         </div>
 
-        <div class="control">
+        <div class="control" data-stat="discipline">
           <div class="row">
             <label for="stat-discipline">Discipline</label>
             <span class="value-badge" id="value-discipline" aria-live="polite">50</span>
@@ -356,7 +524,7 @@
           </div>
         </div>
 
-        <div class="control">
+        <div class="control" data-stat="mental">
           <div class="row">
             <label for="stat-mental">Mental</label>
             <span class="value-badge" id="value-mental" aria-live="polite">50</span>
@@ -366,7 +534,7 @@
           </div>
         </div>
 
-        <div class="control">
+        <div class="control" data-stat="intellect">
           <div class="row">
             <label for="stat-intellect">Intellect</label>
             <span class="value-badge" id="value-intellect" aria-live="polite">50</span>
@@ -376,7 +544,7 @@
           </div>
         </div>
 
-        <div class="control">
+        <div class="control" data-stat="ambition">
           <div class="row">
             <label for="stat-ambition">Ambition</label>
             <span class="value-badge" id="value-ambition" aria-live="polite">50</span>
@@ -450,9 +618,23 @@
         const max = Number(slider.max || 100);
         const val = Number(slider.value || 0);
         const pct = ((val - min) / (max - min)) * 100;
-        slider.style.background = `linear-gradient(90deg, var(--neon) ${pct}%, var(--track) ${pct}%)`;
+        
+        // Get the stat type from the slider ID and use appropriate color
+        const statType = slider.id.replace('stat-', '');
+        const colorVar = `var(--${statType}-color)`;
+        slider.style.background = `linear-gradient(90deg, ${colorVar} ${pct}%, var(--track) ${pct}%)`;
       };
 
+      // Define colors for each stat
+      const statColors = [
+        '#ff6b6b',  // Physical - Red
+        '#4ecdc4',  // Relationship - Teal  
+        '#45b7d1',  // Discipline - Blue
+        '#96ceb4',  // Mental - Green
+        '#feca57',  // Intellect - Orange/Yellow
+        '#a29bfe'   // Ambition - Purple
+      ];
+      
       // Initialize Chart.js radar chart
       const radar = new Chart(ctx, {
         type: 'radar',
@@ -463,15 +645,17 @@
               label: 'Life Balance',
               data: getValues(),
               fill: true,
-              backgroundColor: 'rgba(0, 255, 200, 0.15)',
+              backgroundColor: 'rgba(0, 255, 200, 0.08)',
               borderColor: '#00ffc8',
-              borderWidth: 2,
-              pointBackgroundColor: '#00ffc8',
+              borderWidth: 3,
+              pointBackgroundColor: statColors,
               pointBorderColor: '#09121a',
               pointHoverBackgroundColor: '#09121a',
-              pointHoverBorderColor: '#00ffc8',
-              pointRadius: 3,
-              pointHoverRadius: 5
+              pointHoverBorderColor: statColors,
+              pointRadius: 6,
+              pointHoverRadius: 8,
+              pointBorderWidth: 2,
+              pointHoverBorderWidth: 3
             }
           ]
         },
@@ -494,11 +678,14 @@
               angleLines: { color: 'rgba(255,255,255,0.10)', lineWidth: 1 },
               grid: { color: 'rgba(255,255,255,0.10)' },
               pointLabels: {
-                color: getComputedStyle(document.documentElement).getPropertyValue('--text-400').trim() || '#9fb3c8',
+                color: statColors,
                 font: {
                   family: getComputedStyle(document.body).fontFamily || 'Orbitron',
-                  size: 12,
-                  weight: '600'
+                  size: 13,
+                  weight: '700'
+                },
+                callback: function(label, index) {
+                  return label.toUpperCase();
                 }
               },
               ticks: { display: false }
