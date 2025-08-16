@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Life Stats Visualizer</title>
+
+  <!-- Google Font (Cyberpunk-esque) -->
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    /* 
+      Cyberpunk-inspired dark theme
+      - Uses neon accents and subtle grid background
+      - Responsive layout with Controls + Chart side-by-side on desktop
+    */
+    :root {
+      --bg-900: #0b0f14;
+      --bg-800: #0f151d;
+      --panel-800: #0e141b;
+      --panel-700: #101822;
+      --text-100: #e7f2ff;
+      --text-300: #b4c8dd;
+      --text-400: #9fb3c8;
+      --neon: #00ffc8;
+      --neon-2: #7b61ff;
+      --neon-dim: rgba(0, 255, 200, 0.15);
+      --track: rgba(255, 255, 255, 0.12);
+      --radius: 14px;
+      --shadow-neon: 0 0 0 1px rgba(0, 255, 200, 0.25), 0 0 18px rgba(0, 255, 200, 0.18), inset 0 0 24px rgba(0, 255, 200, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text-100);
+      font-family: 'Orbitron', system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji';
+      background:
+        radial-gradient(1200px 600px at 80% -10%, rgba(123, 97, 255, 0.2), transparent 60%),
+        radial-gradient(900px 500px at -10% 110%, rgba(0, 255, 200, 0.12), transparent 60%),
+        linear-gradient(180deg, #0a0f15 0%, #0b1118 100%),
+        /* Subtle grid */
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 22px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0px, rgba(255,255,255,0.02) 1px, transparent 1px, transparent 22px);
+      min-height: 100svh;
+      padding: 20px;
+    }
+
+    .app {
+      max-width: 1120px;
+      margin: 0 auto;
+      display: grid;
+      gap: 20px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: var(--text-100);
+      text-shadow: 0 0 18px rgba(0, 255, 200, 0.25);
+    }
+
+    .subtle {
+      color: var(--text-400);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.85;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+
+    @media (min-width: 768px) {
+      .grid {
+        grid-template-columns: 1.05fr 1fr;
+      }
+    }
+
+    .panel {
+      background: linear-gradient(180deg, var(--panel-800), var(--panel-700));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      box-shadow: var(--shadow-neon);
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .panel::after {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      pointer-events: none;
+      background: radial-gradient(500px 120px at 40% -40%, rgba(0,255,200,0.14), transparent 60%);
+      z-index: -1;
+    }
+
+    /* Controls */
+    .controls h2 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-300);
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+      padding: 12px 10px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      background: rgba(10, 14, 22, 0.5);
+      margin-bottom: 10px;
+    }
+
+    .control .row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    label {
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--text-100);
+      text-transform: uppercase;
+      opacity: 0.95;
+    }
+
+    .value-badge {
+      min-width: 44px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      color: var(--text-100);
+      padding: 6px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(0,255,200,0.6);
+      background: linear-gradient(180deg, rgba(0,255,200,0.12), rgba(0,255,200,0.06));
+      box-shadow: 0 0 14px rgba(0, 255, 200, 0.25) inset, 0 0 20px rgba(0, 255, 200, 0.12);
+    }
+
+    .slider-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* Custom range slider (WebKit/Blink) */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--neon) 50%, var(--track) 0);
+      outline: none;
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4), 0 0 14px rgba(0, 255, 200, 0.1);
+      transition: box-shadow 0.2s ease;
+      cursor: pointer;
+    }
+    input[type="range"]:focus {
+      box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.4), 0 0 22px rgba(0, 255, 200, 0.22);
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 12px;
+      background: transparent; /* Allow input background gradient to show */
+      border-radius: 999px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      margin-top: -6px; /* center the thumb vertically */
+      background: radial-gradient(circle at 50% 50%, #001c16 0%, #001c16 42%, #003e31 43%, #003e31 55%, #00ffc8 56%, #00ffc8 100%);
+      border: 2px solid #00ffc8;
+      box-shadow:
+        0 0 0 2px rgba(0, 255, 200, 0.25),
+        0 0 18px rgba(0, 255, 200, 0.35),
+        inset 0 0 10px rgba(0, 255, 200, 0.5);
+    }
+
+    /* Firefox */
+    input[type="range"]::-moz-range-track {
+      height: 12px;
+      background: var(--track);
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    input[type="range"]::-moz-range-progress {
+      height: 12px;
+      background: var(--neon);
+      border-radius: 999px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 50% 50%, #001c16 0%, #001c16 42%, #003e31 43%, #003e31 55%, #00ffc8 56%, #00ffc8 100%);
+      border: 2px solid #00ffc8;
+      box-shadow:
+        0 0 0 2px rgba(0, 255, 200, 0.25),
+        0 0 18px rgba(0, 255, 200, 0.35),
+        inset 0 0 10px rgba(0, 255, 200, 0.5);
+    }
+
+    /* Chart area */
+    .chart {
+      display: grid;
+      gap: 12px;
+    }
+
+    .chart-card {
+      position: relative;
+      border-radius: var(--radius);
+      padding: 14px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: linear-gradient(180deg, rgba(10,15,22,0.9), rgba(10,15,22,0.75));
+      box-shadow: var(--shadow-neon), inset 0 0 80px rgba(123, 97, 255, 0.06);
+      min-height: 360px;
+    }
+
+    @media (min-width: 768px) {
+      .chart-card {
+        min-height: 520px;
+      }
+    }
+
+    .radar-wrap {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+
+    canvas {
+      position: relative;
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+      filter: drop-shadow(0 0 18px rgba(0,255,200,0.12));
+    }
+
+    .avg-score {
+      position: absolute;
+      inset: 50% auto auto 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      font-weight: 800;
+      font-size: 48px;
+      letter-spacing: 0.06em;
+      color: #dffff6;
+      text-shadow:
+        0 0 24px rgba(0,255,200,0.45),
+        0 0 48px rgba(0,255,200,0.25);
+    }
+
+    .avg-label {
+      text-align: center;
+      font-size: 12px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-400);
+    }
+
+    .legend {
+      display: inline-flex;
+      gap: 12px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--text-300);
+      letter-spacing: 0.06em;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--neon);
+      box-shadow: 0 0 12px rgba(0,255,200,0.7);
+      border: 1px solid rgba(0,0,0,0.6);
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="header">
+      <h1 class="title">Life Stats Visualizer</h1>
+      <div class="subtle">Cybernetic Balance Monitor</div>
+    </header>
+
+    <section class="grid">
+      <!-- Controls Panel -->
+      <section class="panel controls" aria-label="Life stat controls">
+        <h2>Adjust Your Stats</h2>
+
+        <div class="control">
+          <div class="row">
+            <label for="stat-physical">Physical</label>
+            <span class="value-badge" id="value-physical" aria-live="polite">50</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="stat-physical" min="0" max="100" value="50" />
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="row">
+            <label for="stat-relationship">Relationship</label>
+            <span class="value-badge" id="value-relationship" aria-live="polite">50</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="stat-relationship" min="0" max="100" value="50" />
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="row">
+            <label for="stat-discipline">Discipline</label>
+            <span class="value-badge" id="value-discipline" aria-live="polite">50</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="stat-discipline" min="0" max="100" value="50" />
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="row">
+            <label for="stat-mental">Mental</label>
+            <span class="value-badge" id="value-mental" aria-live="polite">50</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="stat-mental" min="0" max="100" value="50" />
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="row">
+            <label for="stat-intellect">Intellect</label>
+            <span class="value-badge" id="value-intellect" aria-live="polite">50</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="stat-intellect" min="0" max="100" value="50" />
+          </div>
+        </div>
+
+        <div class="control">
+          <div class="row">
+            <label for="stat-ambition">Ambition</label>
+            <span class="value-badge" id="value-ambition" aria-live="polite">50</span>
+          </div>
+          <div class="slider-wrap">
+            <input type="range" id="stat-ambition" min="0" max="100" value="50" />
+          </div>
+        </div>
+      </section>
+
+      <!-- Chart Panel -->
+      <section class="panel chart" aria-label="Radar chart visualization">
+        <div class="legend"><span class="dot"></span> <span>Average shown in center</span></div>
+        <div class="chart-card">
+          <div class="radar-wrap">
+            <canvas id="lifeRadar" aria-label="Life stats radar chart"></canvas>
+            <div class="avg-score" id="avgScore">50</div>
+          </div>
+        </div>
+        <div class="avg-label">Central score is the rounded average of all six stats</div>
+      </section>
+    </section>
+  </main>
+
+  <script>
+    // Life Stats Visualizer
+    // - Initializes a Chart.js radar chart
+    // - Syncs six sliders with the chart in real-time
+    // - Displays the rounded average value in the chart center
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Labels for the radar chart
+      const STAT_LABELS = [
+        'Physical',
+        'Relationship',
+        'Discipline',
+        'Mental',
+        'Intellect',
+        'Ambition'
+      ];
+
+      // Collect slider elements and their value badges
+      const sliderIds = [
+        'stat-physical',
+        'stat-relationship',
+        'stat-discipline',
+        'stat-mental',
+        'stat-intellect',
+        'stat-ambition'
+      ];
+
+      const sliders = sliderIds.map(id => document.getElementById(id));
+      const valueBadges = {
+        'stat-physical': document.getElementById('value-physical'),
+        'stat-relationship': document.getElementById('value-relationship'),
+        'stat-discipline': document.getElementById('value-discipline'),
+        'stat-mental': document.getElementById('value-mental'),
+        'stat-intellect': document.getElementById('value-intellect'),
+        'stat-ambition': document.getElementById('value-ambition')
+      };
+
+      const avgScoreEl = document.getElementById('avgScore');
+      const ctx = document.getElementById('lifeRadar').getContext('2d');
+
+      // Helper: current numeric values from sliders
+      const getValues = () => sliders.map(s => Number(s.value));
+
+      // Helper: update the visual fill of a slider track using a linear gradient
+      const updateSliderFill = (slider) => {
+        const min = Number(slider.min || 0);
+        const max = Number(slider.max || 100);
+        const val = Number(slider.value || 0);
+        const pct = ((val - min) / (max - min)) * 100;
+        slider.style.background = `linear-gradient(90deg, var(--neon) ${pct}%, var(--track) ${pct}%)`;
+      };
+
+      // Initialize Chart.js radar chart
+      const radar = new Chart(ctx, {
+        type: 'radar',
+        data: {
+          labels: STAT_LABELS,
+          datasets: [
+            {
+              label: 'Life Balance',
+              data: getValues(),
+              fill: true,
+              backgroundColor: 'rgba(0, 255, 200, 0.15)',
+              borderColor: '#00ffc8',
+              borderWidth: 2,
+              pointBackgroundColor: '#00ffc8',
+              pointBorderColor: '#09121a',
+              pointHoverBackgroundColor: '#09121a',
+              pointHoverBorderColor: '#00ffc8',
+              pointRadius: 3,
+              pointHoverRadius: 5
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          animation: { duration: 180 },
+          plugins: {
+            legend: { display: false },
+            tooltip: { enabled: false }
+          },
+          elements: {
+            line: { borderJoinStyle: 'round', tension: 0.25 }
+          },
+          scales: {
+            r: {
+              beginAtZero: true,
+              min: 0,
+              max: 100,
+              angleLines: { color: 'rgba(255,255,255,0.10)', lineWidth: 1 },
+              grid: { color: 'rgba(255,255,255,0.10)' },
+              pointLabels: {
+                color: getComputedStyle(document.documentElement).getPropertyValue('--text-400').trim() || '#9fb3c8',
+                font: {
+                  family: getComputedStyle(document.body).fontFamily || 'Orbitron',
+                  size: 12,
+                  weight: '600'
+                }
+              },
+              ticks: { display: false }
+            }
+          }
+        }
+      });
+
+      // Update function:
+      // 1) Sync dataset with slider values
+      // 2) Update central average score (rounded)
+      // 3) Refresh the chart
+      const updateApp = () => {
+        const values = getValues();
+        radar.data.datasets[0].data = values;
+        radar.update();
+
+        const average = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+        avgScoreEl.textContent = String(average);
+      };
+
+      // Bind slider listeners: update badge, track fill, and chart
+      sliders.forEach(slider => {
+        const badge = valueBadges[slider.id];
+        const syncBadge = () => { badge.textContent = slider.value; };
+
+        // Initialize UI for each slider
+        syncBadge();
+        updateSliderFill(slider);
+
+        slider.addEventListener('input', () => {
+          syncBadge();
+          updateSliderFill(slider);
+          updateApp();
+        });
+      });
+
+      // Initial render
+      updateApp();
+    });
+  </script>
+</body>
+</html>
