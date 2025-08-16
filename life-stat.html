@@ -176,6 +176,33 @@
       opacity: 0.95;
     }
 
+    .editable-label {
+      background: transparent;
+      border: none;
+      font-size: 13px;
+      letter-spacing: 0.08em;
+      color: var(--text-100);
+      text-transform: uppercase;
+      opacity: 0.95;
+      font-family: inherit;
+      font-weight: inherit;
+      outline: none;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: background-color 0.2s ease;
+      min-width: 0;
+      width: auto;
+    }
+
+    .editable-label:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .editable-label:focus {
+      background: rgba(0, 255, 200, 0.1);
+      border: 1px solid rgba(0, 255, 200, 0.3);
+    }
+
     .value-badge {
       min-width: 44px;
       text-align: center;
@@ -496,7 +523,7 @@
 
         <div class="control" data-stat="physical">
           <div class="row">
-            <label for="stat-physical">Physical</label>
+            <input type="text" class="editable-label" id="label-physical" value="Physical" aria-label="Edit Physical stat name" />
             <span class="value-badge" id="value-physical" aria-live="polite">50</span>
           </div>
           <div class="slider-wrap">
@@ -506,7 +533,7 @@
 
         <div class="control" data-stat="relationship">
           <div class="row">
-            <label for="stat-relationship">Relationship</label>
+            <input type="text" class="editable-label" id="label-relationship" value="Relationship" aria-label="Edit Relationship stat name" />
             <span class="value-badge" id="value-relationship" aria-live="polite">50</span>
           </div>
           <div class="slider-wrap">
@@ -516,7 +543,7 @@
 
         <div class="control" data-stat="discipline">
           <div class="row">
-            <label for="stat-discipline">Discipline</label>
+            <input type="text" class="editable-label" id="label-discipline" value="Discipline" aria-label="Edit Discipline stat name" />
             <span class="value-badge" id="value-discipline" aria-live="polite">50</span>
           </div>
           <div class="slider-wrap">
@@ -526,7 +553,7 @@
 
         <div class="control" data-stat="mental">
           <div class="row">
-            <label for="stat-mental">Mental</label>
+            <input type="text" class="editable-label" id="label-mental" value="Mental" aria-label="Edit Mental stat name" />
             <span class="value-badge" id="value-mental" aria-live="polite">50</span>
           </div>
           <div class="slider-wrap">
@@ -536,7 +563,7 @@
 
         <div class="control" data-stat="intellect">
           <div class="row">
-            <label for="stat-intellect">Intellect</label>
+            <input type="text" class="editable-label" id="label-intellect" value="Intellect" aria-label="Edit Intellect stat name" />
             <span class="value-badge" id="value-intellect" aria-live="polite">50</span>
           </div>
           <div class="slider-wrap">
@@ -546,7 +573,7 @@
 
         <div class="control" data-stat="ambition">
           <div class="row">
-            <label for="stat-ambition">Ambition</label>
+            <input type="text" class="editable-label" id="label-ambition" value="Ambition" aria-label="Edit Ambition stat name" />
             <span class="value-badge" id="value-ambition" aria-live="polite">50</span>
           </div>
           <div class="slider-wrap">
@@ -576,8 +603,8 @@
     // - Displays the rounded average value in the chart center
 
     document.addEventListener('DOMContentLoaded', () => {
-      // Labels for the radar chart
-      const STAT_LABELS = [
+      // Initial labels for the radar chart
+      const DEFAULT_LABELS = [
         'Physical',
         'Relationship',
         'Discipline',
@@ -585,6 +612,9 @@
         'Intellect',
         'Ambition'
       ];
+
+      // Current labels (can be modified by user)
+      let currentLabels = [...DEFAULT_LABELS];
 
       // Collect slider elements and their value badges
       const sliderIds = [
@@ -596,7 +626,18 @@
         'stat-ambition'
       ];
 
+      // Collect label input elements
+      const labelIds = [
+        'label-physical',
+        'label-relationship',
+        'label-discipline',
+        'label-mental',
+        'label-intellect',
+        'label-ambition'
+      ];
+
       const sliders = sliderIds.map(id => document.getElementById(id));
+      const labelInputs = labelIds.map(id => document.getElementById(id));
       const valueBadges = {
         'stat-physical': document.getElementById('value-physical'),
         'stat-relationship': document.getElementById('value-relationship'),
@@ -639,7 +680,7 @@
       const radar = new Chart(ctx, {
         type: 'radar',
         data: {
-          labels: STAT_LABELS,
+          labels: currentLabels,
           datasets: [
             {
               label: 'Life Balance',
@@ -707,6 +748,14 @@
         avgScoreEl.textContent = String(average);
       };
 
+      // Update chart labels function
+      const updateChartLabels = () => {
+        // Get current label values from inputs
+        currentLabels = labelInputs.map(input => input.value || input.placeholder || 'Stat');
+        radar.data.labels = currentLabels;
+        radar.update();
+      };
+
       // Bind slider listeners: update badge, track fill, and chart
       sliders.forEach(slider => {
         const badge = valueBadges[slider.id];
@@ -721,6 +770,12 @@
           updateSliderFill(slider);
           updateApp();
         });
+      });
+
+      // Bind label input listeners: update chart labels in real-time
+      labelInputs.forEach(labelInput => {
+        labelInput.addEventListener('input', updateChartLabels);
+        labelInput.addEventListener('blur', updateChartLabels); // Also update on blur for better UX
       });
 
       // Initial render
